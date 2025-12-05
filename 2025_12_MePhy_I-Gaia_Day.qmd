@@ -1,0 +1,514 @@
+---
+title: "[Revisiting Fracture Mechanic Handbooks <br> with (Interpretable) Sparse Regression]{.example}"
+subtitle: ""
+format:
+  quarto-ensta-revealjs: default
+author:
+  - name: "**F. Loiseau** (IMSIA) <br> Y. Epongue Djeugoue, V. Lazarus (IMSIA) <br> G. Eliyahu-Yakir, P. Reis (EPFL)."
+    # orcid: 0000-0002-6305-7309
+    email: flavien.loiseau@ensta.fr
+    # affiliations:
+    #   - ref: imsia
+date: 2025-12-09
+date-format: "[MePhy & I-Gaia Day: Machine Learning in mechanics and physics] <br> MMMM D, YYYY."
+bibliography: biblio.bib
+footer: "F. Loiseau -- Revisiting Fracture Mechanics Handbooks with Sparse Regression -- MePhy & I-Gaia Day"
+embed-resources: true
+---
+
+## Notations {visibility="hidden"}
+
+\newcommand{\pp}{\color{green}{\mathbf{p}}}
+\newcommand{\pc}[1]{\color{green}{p_{#1}}}
+\newcommand{\Kp}[1]{\color{red}{K_{#1}}}
+\newcommand{\tildeKp}[2]{\color{red}{\widetilde{K}_{#1}^{#2}}}
+\newcommand{\cc}{\color{blue}{\mathbf{c}}}
+\newcommand{\ccopt}{\color{blue}{\mathbf{c}^*}}
+\newcommand{\ccc}[1]{\color{blue}{c_{#1}}}
+\newcommand{\Nobs}{N_{\mathrm{obs}}}
+\newcommand{\alphap}{\color{green}{\alpha}}
+
+# Fracture Mechanics {visibility="hidden"}
+
+## Linear Elastic Fracture Mechanics {.scrollable}
+
+::::{.columns}
+:::{.column width=50%}
+![The S.S. Schenectady tanker split apart by brittle fracture while in harbor, 1943. <br> Source : [https://en.wikipedia.org/wiki/Fracture_mechanics](https://en.wikipedia.org/wiki/Fracture_mechanics).](figures/tanker_schenectady.jpg){width=90%}
+:::
+
+:::{.column width=50%}
+#### [Typical problem]{.example}
+
+An elastic body $\Omega$ with a crack $\Gamma$ under a given load.
+
+![](figures/problem_generic_gamma.svg){width=50% fig-align="center"}
+
+[Assumption : Non-linearities are confined close to the crack tip.]{.muted style="font-size:15pt;"}
+
+:::
+::::
+
+:::{style="text-align:center; font-size:32pt;"}
+**[Question :]{.example .smallcaps} Does the crack propagates ?**
+:::
+
+
+
+## Crack tip singularity
+
+#### Stress field [@williams_stress_1957]
+
+::::{.columns}
+:::{.column width=20%}
+![](figures/crack_tip_illustration.svg){fig-align="center" width=50%}
+:::
+
+:::{.column width=80%}
+$$
+\sigma_{ij}(r, \theta) =
+	\frac{\color{red}{K_I}}{\sqrt{2\pi r}} f_{ij}^{I}(\theta) +
+	\frac{\color{red}{K_{II}}}{\sqrt{2\pi r}} f_{ij}^{II}(\theta) +
+	\frac{\color{red}{K_{III}}}{\sqrt{2\pi r}} f_{ij}^{III}(\theta) + \mathcal{O}(1),
+	\quad
+	\color{gray}{\sigma_{ij}(r, \theta) \underset{r \to 0}{\to} \infty.}
+$$
+
+:::{style="text-align:center"}
+There is a stress singularity at crack tip.
+:::
+:::
+::::
+
+
+::::{.columns .fragment}
+
+:::{.column width=40%}
+<br>
+<br>
+<br>
+
+#### Stress Intensity Factors (SIFs)
+
+Denoted $K_p$, they :
+
+- represent the **crack tip sollicitation**,
+- depend on **geometry** and **load**.
+:::
+
+:::{.column width=60%}
+![Source: [https://en.wikipedia.org/wiki/Fracture_mechanics](https://en.wikipedia.org/wiki/Fracture_mechanics).](figures/fracture_modes.svg)
+:::
+::::
+
+## Designing structures with cracks
+
+
+::::{.columns}
+:::{.column width=60%}
+#### Crack propagation criteria
+
+Propagation criteria rely on the SIFs $K_p$, *e.g.*, 
+
+$\quad \displaystyle \color{red}{K_I} \leq K_{Ic}$, or <br><br>
+$\quad \displaystyle G = \frac{\color{red}{K_{I}}^2 + \color{red}{K_{II}}^2}{E'} + \frac{\color{red}{K_{III}}^2}{2 \mu} \leq G_c$.
+
+#### How to determine the SIFs ?
+Different methods are employed : 
+
+- analytical [(*e.g.*, crack in (semi-)infinite domain TODO: Change to a specific method)]{.muted},
+- numerical [(*e.g.*, FEM simulations)]{.muted},
+- experimental [(*e.g.*, photo-elasticity, DIC.)]{.muted}.
+
+Known solutions have been compiled in handbooks!
+:::
+
+:::{.column width=40%}
+#### Fracture mechanic design handbooks <br> [@tada_stress_2000]
+
+![](figures/tada_et_al_2000_handbook_cover.jpg){fig-align="center" width=70%}
+
+:::
+::::
+
+## Example [@tada_stress_2000]
+
+::::{.columns}
+:::{.column}
+![](figures/tada_et_al_2000_round_ct_specimen_illustration.png){fig-align="center" width=100%}
+:::
+:::{.column}
+
+![](figures/tada_et_al_2000_round_ct_specimen_expression.png){fig-align="center" width=100%}
+
+
+Dimensional analysis $\rightarrow$ Relevant parameters.
+
+Here, it introduces the
+
+:::{style="text-align:center;"}
+**configuration function** $F(\pp)$,
+:::
+
+depending on the parameters $\pp$ (geometry & load).
+
+#### Limitations
+
+- Dense polynomials
+- Few parameters
+
+:::
+::::
+
+# Sparse regression {visibility="hidden"}
+
+## Finding a sparse analytical model
+
+Colors: $\color{green}{\text{Inputs (parameters)} \pp},  \color{blue}{\text{Coefficients } \cc},  \color{red}{\text{Outputs } \Kp{p}}$.
+
+#### Objective
+For a structure and load parameterized by $\pp = [\pc{1}, \pc{2}, ..., \pc{N}]^{T}$, find the relationship $\Kp{p}(\pp)$.
+
+
+#### Tool : LASSO regression [@tibshirani_regression_1996]
+We look for a polynomial approximation of 
+$$
+\Kp{p}(\pp) \approx \tildeKp{p}{\cc}(\pp) = \sum_{i_1} \sum_{i_2} \cdot\cdot\cdot \sum_{i_N} \ccc{i_1, i_2, ..., i_n} \pc{1}^{i_1} \pc{2}^{i_2} ...  \pc{N}^{i_P}.
+$$
+For $\Nobs$ observations ($\pp$, $\Kp{p}$), the optimal coefficients $\ccopt$ minimizes
+$$
+\ccopt
+=
+\arg\min_{\cc}
+\frac{1}{2 \Nobs} \sum_{\boldsymbol{p}}  \left(\tildeKp{p}{\cc}(\pp) - \Kp{p}(\pp) \right)^2
++
+\beta
+\color{blue}{\| \cc \|_1}
+, \quad
+\color{gray}{\| \boldsymbol{c} \|_1 = \sum_n | c_n |.}
+$$
+The L1-norm of the coefficients $\cc$ drives irrelevant coefficients to zero.
+
+#### Adding non-polynomial terms to model
+
+Replace $\pp$ with $\mathbf{s} = [\pc{1}, f(\pc{1}), \pc{2}, f(\pc{2}), ..., \pc{N}, f(\pc{N})]$.
+
+# Applications {visibility="hidden"}
+
+## Ex. 1 : CT specimen - Setup & Data
+::::{.columns}
+:::{.column}
+#### Compact Tension (CT) specimen
+
+![](figures/ct_specimen.svg){width=50% fig-align="center"}
+
+#### Sparse regression setup
+
+|               |                                                             |
+|---------------|-------------------------------------------------------------|
+| Observations  | $a$, $K_I$ [(from numerical simulation)]{.muted}            |
+| Parameters    | $a$, $\exp(a)$, $\frac{1}{\sqrt{b-a}}$                      |
+| Output        | $\hat{K}_I = \frac{K_I}{\sigma \sqrt{a}}$ with $\sigma=P/b$ |
+
+:::
+:::{.column}
+
+<br>
+
+#### Observations
+
+![](figures/ct_specimen_observations.svg){width=100%}
+
+:::
+::::
+
+
+
+## Ex. 1 : CT specimen - Tradeoff - [Deg=2]{.example}
+::::{.columns}
+:::{.column width=65%}
+:::{.r-stack}
+![](figures/ct_specimen_tradeoff_plot_deg_2.svg){fig-align="center" width=22cm}
+
+![](figures/ct_specimen_best_models_comparison_deg_2.svg){fig-align="center" width=22cm .fragment}
+:::
+:::
+
+:::{.column width=35%}
+
+#### Code output
+
+```{shell}
+=== Model 1
+Assessment :
+	- Hyperparameter beta    : 3.83e+02
+	- Number of coefficients : 1
+	- R2 score               : 0.000
+LaTeX expression:
+\hat{K}_{I}(a) =
+	+45.6
+
+=== Model 2
+Assessment :
+	- Hyperparameter beta    : 1.02e+01
+	- Number of coefficients : 2
+	- R2 score               : 0.967
+LaTeX expression:
+\hat{K}_{I}(a) =
+	-21.1
+	+17.9 \frac{1}{\sqrt{b-a}}^2
+
+=== Model 3
+Assessment :
+	- Hyperparameter beta    : 5.11e-01
+	- Number of coefficients : 3
+	- R2 score               : 0.997
+LaTeX expression:
+\hat{K}_{I}(a) =
+	+5.43
+	-14.4 \exp(a/b)^2
+	+22.9 \frac{1}{\sqrt{b-a}}^2
+```
+
+:::
+::::
+
+## Ex. 1 : CT specimen - Tradeoff - [Deg=3]{.example}
+::::{.columns}
+:::{.column width=65%}
+:::{.r-stack}
+![](figures/ct_specimen_tradeoff_plot_deg_3.svg){fig-align="center" width=22cm}
+
+![](figures/ct_specimen_best_models_comparison_deg_3.svg){fig-align="center" width=22cm .fragment}
+:::
+:::
+
+:::{.column width=35%}
+
+#### Code output
+
+```{shell}
+=== Model 1
+Assessment :
+	- Hyperparameter beta    : 1.79e+03
+	- Number of coefficients : 1
+	- R2 score               : 0.000
+LaTeX expression:
+\hat{K}_{I}(a) =
+	+45.6
+
+=== Model 2
+Assessment :
+	- Hyperparameter beta    : 3.43e+00
+	- Number of coefficients : 2
+	- R2 score               : 0.999
+LaTeX expression:
+\hat{K}_{I}(a) =
+	+3.75
+	+4.11 \frac{1}{\sqrt{b-a}}^3
+
+=== Model 3
+Assessment :
+	- Hyperparameter beta    : 6.13e-01
+	- Number of coefficients : 3
+	- R2 score               : 1.000
+LaTeX expression:
+\hat{K}_{I}(a) =
+	+5.32
+	-0.383 \exp(a/b)^3
+	+4.19 \frac{1}{\sqrt{b-a}}^3
+```
+
+:::
+::::
+
+
+## Ex. 2 : Rotating structure - Setup & Data
+
+::::{.columns}
+:::{.column width=40%}
+
+<br>
+
+#### Experimental setup
+By G. Eliyahu-Yakir and P. Reis (EPFL)
+
+![](figures/rotating_structure_setup_annotated.svg){fig-align="center" width=100%}
+
+:::
+:::{.column width=60% .fragment}
+
+
+#### Plate geometry
+
+![](figures/rotating_structure_geometry.svg){fig-align="center" width=65%}
+
+#### Illustration
+
+![](figures/rotating_structure_problem.svg){fig-align="center" width=75%}
+
+:::
+::::
+
+
+
+## Ex. 2 : Rotating structure - Physics
+
+::::{.columns}
+:::{.column width=41%}
+
+#### Illustration
+
+![](figures/rotating_structure_problem.svg){fig-align="center" width=100%}
+
+#### 7-parameter problem
+
+- Geometry: $\color{green}{W, L, a, L_c}$.
+- 3D volumic loads:
+  - **centrifugal** : $\boldsymbol{f}_\Omega(r, \theta) \propto \color{green}{\Omega}$
+    - along $\boldsymbol{e}_r$ and $\boldsymbol{e}_\theta$,
+  - **Euler** : $\boldsymbol{f}_\dot{\Omega}(r, \theta) \propto \color{green}{\dot{\Omega}}$
+    - along $\boldsymbol{e}_2 = \cos(\alphap) \boldsymbol{e}_\theta - \sin(\alphap) \boldsymbol{e}_z$.
+:::
+
+:::{.column width=58% .fragment}
+#### Dimensional analysis [(towards a 3-parameter problem)]{.muted}
+The superposition principle ($K_p = K_{p}^{\Omega} + K_{p}^{\dot{\Omega}}$) and the Buckingham $\Pi$ theorem give [($\frac{L}{W}$ is fixed)]{.muted}
+
+- centrifugal load
+  - $K_{I}^{\Omega}   = \rho \color{green}{\Omega}^2 \color{green}{W}^{5/2} \color{red}{\hat{K}_{I}^{\Omega}}\left(\color{green}{\frac{a}{W}}, \color{green}{\frac{L_c}{L}}, \color{gray}{\frac{L}{W}}\right)$
+  - $K_{II}^{\Omega}  = \rho \color{green}{\Omega}^2 \color{green}{W}^{5/2} \color{red}{\hat{K}_{II}^{\Omega}}\left(\color{green}{\frac{a}{W}}, \color{green}{\frac{L_c}{L}}, \color{gray}{\frac{L}{W}}\right)$
+  - $K_{III}^{\Omega} = 0$,
+- Euler load
+  - $K_{I}^{\dot{\Omega}}   = \rho \color{green}{\dot{\Omega}} \color{green}{W}^{5/2} \cos(\color{green}{\alpha}) \color{red}{\hat{K}_{I}^{\dot{\Omega}}}\left(\color{green}{\frac{a}{W}}, \color{green}{\frac{L_c}{L}}, \color{gray}{\frac{L}{W}}\right)$
+  - $K_{II}^{\dot{\Omega}}  = \rho \color{green}{\dot{\Omega}} \color{green}{W}^{5/2} \cos(\color{green}{\alpha}) \color{red}{\hat{K}_{II}^{\dot{\Omega}}}\left(\color{green}{\frac{a}{W}}, \color{green}{\frac{L_c}{L}}, \color{gray}{\frac{L}{W}}\right)$
+  - $K_{III}^{\dot{\Omega}} = \rho \color{green}{\dot{\Omega}} \color{green}{W}^{5/2} \sin(\color{green}{\alpha}) \color{red}{\hat{K}_{III}^{\dot{\Omega}}}\left(\color{green}{\frac{a}{W}}, \color{green}{\frac{L_c}{L}}, \color{gray}{\frac{L}{W}}\right)$.
+
+:::
+::::
+
+
+## Ex. 2 : Rotating structure - Data 
+
+::::{.columns}
+
+:::{.column width=28%}
+
+![](figures/rotating_structure_KI_centrifugal_data.svg){}
+
+![](figures/rotating_structure_KI_euler_data.svg){}
+:::
+
+:::{.column width=28%}
+
+![](figures/rotating_structure_KII_centrifugal_data.svg){}
+
+![](figures/rotating_structure_KII_euler_data.svg){}
+
+:::
+:::{.column width=28%}
+
+![](figures/rotating_structure_KIII_centrifugal_data.svg){}
+
+![](figures/rotating_structure_KIII_euler_data.svg){}
+:::
+
+:::{.column width=16%}
+#### Data generation
+
+Elastic FEM simulations
+
+:::
+
+::::
+
+
+## Ex. 2 : Rotating structure - Model $\hat{K}_{I}^{\dot{\Omega}}$
+::::{.columns}
+:::{.column}
+![](figures/rotating_structure_KI_euler_tradeoff.svg){width=100%}
+:::
+:::{.column}
+![](figures/rotating_structure_KI_euler_actual_vs_predicted.svg){width=100%}
+:::
+::::
+
+## Ex. 2 : Rotating structure - All the SIFs
+
+| Model                                                                                                                                                                                | $N_{\mathrm{coeff}}$ | $R^2$ |
+|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:--------------------:|:-----:|
+| $\displaystyle \hat{K}_{I}^{\Omega} = \exp\left( 2.77 + 2.72 \exp\left(\frac{a}{W}\right) - 0.986 \exp\left(\frac{Lc}{L}\right) \right)$                                             |           3          | 0.995 |
+| $\displaystyle \hat{K}_{II}^{\Omega} = 0$                                                                                                                                            |           -          |   -   |
+| $\displaystyle \hat{K}_{III}^{\Omega} = 0$                                                                                                                                           |           -          |       |
+| $\displaystyle \hat{K}_{I}^{\dot{\Omega}} = \exp \left(8.25 + 3.25 \left(\frac{a}{W}\right)^2 - 3.9 \left(\frac{L_c}{L}\right)^2 \right)$                                            |           3          | 0.996 |
+| $\displaystyle \hat{K}_{II}^{\dot{\Omega}} = -5.75 -127 \left(\frac{a}{W}\right)^2 -394 \frac{a}{W} \left(1-\frac{Lc}{L}\right)$                                                     |           3          | 0.989 |
+| $\displaystyle \hat{K}_{III}^{\dot{\Omega}} = 52.7 + 238 \left(\frac{a}{W}\right) \left(1-\frac{Lc}{L}\right) + 97.4 \left(\frac{a}{W}\right)^3 - 66.6 \left(\frac{L_c}{L}\right)^3$ |           4          | 0.995 |
+
+
+:::{style="text-align:center; font-size:32pt;"}
+**[The fracture mechanics problem is now fully analytical.]{.example}**
+:::
+
+# Conclusion {visibility="hidden"}
+
+## Conclusion
+
+::::{.columns}
+:::{.column}
+
+<br>
+
+#### Summary of the methodology
+
+1. Physics : Dimensional analysis + Superposition
+    - [Isolate independent SIFs]{.muted}
+    - [Find the proper dimensionless parameters]{.muted}
+2. Generation of the data
+    - [Sampling of the parametric space (LHS)]{.muted}
+    - [Elastic simulations]{.muted}
+3. Machine learning : Sparse regression
+    - [Large polynomial + L1-regularization]{.muted}
+    - [Injection of non-linear terms as model input]{.muted}
+4. Result : Sparse analytical approximation of the SIFs
+:::
+:::{.column}
+
+<br>
+<br>
+
+#### Benefits in fracture mechanics
+
+A problem of fracture can now be [**fully analytical**]{.example} facilitating
+
+- uncertainty quantification,
+- design (parametric optimization of structure),
+- stability analysis,
+- etc.
+
+:::
+::::
+
+
+
+# [Thanks for your attention !]{style="font-size:70%"}
+
+**F. Loiseau, Y. Epongue Djeugoue, G. Eliyahu-Yakir, P. Reis, V. Lazarus.**
+
+[flavien.loiseau@ensta.fr](mailto:flavien.loiseau@ensta.fr)
+
+
+![](figures/qrcode.svg){.absolute top="10%" right="5.6%" width="160" height="160"}
+
+:::{.absolute top="55%" right="6.9%"}
+Presentation
+:::
+
+<br>
+<br>
+
+Ce travail est financé par l'Agence de l’Innovation de Défense – AID – via le Centre Interdisciplinaire d’Etudes pour la Défense et la Sécurité – CIEDS – (projects 2022 - FracAddi).
+
+## Références
+
+::: {#refs}
+:::
