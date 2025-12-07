@@ -18,19 +18,22 @@ embed-resources: true
 
 ## Notations {visibility="hidden"}
 
-\newcommand{\pp}{\color{green}{\mathbf{p}}}
-\newcommand{\pc}[1]{\color{green}{p_{#1}}}
-\newcommand{\Kp}[1]{\color{red}{K_{#1}}}
-\newcommand{\tildeKp}[2]{\color{red}{\widetilde{K}_{#1}^{#2}}}
+\newcommand{\parcol}[1]{\color{green}{#1}}
+\newcommand{\outcol}[1]{\color{red}{#1}}
+\newcommand{\pp}{\parcol{\mathbf{p}}}
+\newcommand{\pc}[1]{\parcol{p_{#1}}}
+\newcommand{\Kp}[1]{\outcol{K_{#1}}}
+\newcommand{\tildeKp}[2]{\outcol{\widetilde{K}_{#1}^{#2}}}
 \newcommand{\cc}{\color{blue}{\mathbf{c}}}
 \newcommand{\ccopt}{\color{blue}{\mathbf{c}^*}}
 \newcommand{\ccc}[1]{\color{blue}{c_{#1}}}
 \newcommand{\Nobs}{N_{\mathrm{obs}}}
-\newcommand{\alphap}{\color{green}{\alpha}}
+\newcommand{\alphap}{\parcol{\alpha}}
 
 # Fracture Mechanics {visibility="hidden"}
 
 ## Linear Elastic Fracture Mechanics {.scrollable}
+
 
 ::::{.columns}
 :::{.column width=50%}
@@ -71,9 +74,9 @@ An elastic body $\Omega$ with a crack $\Gamma$ under a given load.
 :::{.column width=80%}
 $$
 \sigma_{ij}(r, \theta) =
-	\frac{\color{red}{K_I}}{\sqrt{2\pi r}} f_{ij}^{I}(\theta) +
-	\frac{\color{red}{K_{II}}}{\sqrt{2\pi r}} f_{ij}^{II}(\theta) +
-	\frac{\color{red}{K_{III}}}{\sqrt{2\pi r}} f_{ij}^{III}(\theta) + \mathcal{O}(1),
+	\frac{\outcol{K_I}}{\sqrt{2\pi r}} f_{ij}^{I}(\theta) +
+	\frac{\outcol{K_{II}}}{\sqrt{2\pi r}} f_{ij}^{II}(\theta) +
+	\frac{\outcol{K_{III}}}{\sqrt{2\pi r}} f_{ij}^{III}(\theta) + \mathcal{O}(1),
 	\quad
 	\color{gray}{\sigma_{ij}(r, \theta) \underset{r \to 0}{\to} \infty.}
 $$
@@ -94,7 +97,7 @@ There is a stress singularity at crack tip.
 
 #### Stress Intensity Factors (SIFs)
 
-Denoted $K_p$, they :
+Denoted $K_m$, they :
 
 - represent the **crack tip sollicitation**,
 - depend on **geometry** and **load**.
@@ -113,24 +116,23 @@ Denoted $K_p$, they :
 
 ## Designing structures with cracks
 
-
 ::::{.columns}
 :::{.column width=60%}
 #### Crack propagation criteria
 
-Propagation criteria rely on the SIFs $K_p$, *e.g.*, 
+Propagation criteria rely on the SIFs $K_m$, *e.g.*, 
 
-$\quad \displaystyle \color{red}{K_I} \leq K_{Ic}$, or <br><br>
-$\quad \displaystyle G = \frac{\color{red}{K_{I}}^2 + \color{red}{K_{II}}^2}{E'} + \frac{\color{red}{K_{III}}^2}{2 \mu} \leq G_c$.
+$\quad \displaystyle \outcol{K_I} \leq K_{Ic}$, or <br><br>
+$\quad \displaystyle G = \frac{\outcol{K_{I}}^2 + \outcol{K_{II}}^2}{E'} + \frac{\outcol{K_{III}}^2}{2 \mu} \leq G_c$.
 
 #### How to determine the SIFs ?
 Different methods are employed : 
 
-- analytical [(*e.g.*, crack in (semi-)infinite domain TODO: Change to a specific method)]{.muted},
+- analytical [(mostly for simple case, or (semi-)infinite domains)]{.muted},
 - numerical [(*e.g.*, FEM simulations)]{.muted},
 - experimental [(*e.g.*, photo-elasticity, DIC.)]{.muted}.
 
-Known solutions have been compiled in handbooks!
+#### $\to$ Known solutions have been compiled in handbooks!
 :::
 
 :::{.column width=40%}
@@ -150,19 +152,31 @@ Known solutions have been compiled in handbooks!
 ## Example [@tada_stress_2000]
 
 ::::{.columns}
-:::{.column}
+:::{.column width=45%}
 ![](figures/tada_et_al_2000_round_ct_specimen_illustration.png){fig-align="center" width=100%}
 :::
-:::{.column}
+:::{.column width=55%}
 
+#### Methodology in handbook
 
-![](figures/tada_et_al_2000_round_ct_specimen_expression.png){fig-align="center" width=100%}
-
-#### Methodology
-
-1. Dimensional analysis to find relevant parameters
-	- **dimensionless function** $F(\pp)$,<br>depending on parameters $\pp$ (geometry & load).
-2. Find $F(\pp)$ as truncated series expansion, or <br> fit of numerical/experimental data, or ...
+1. Dimensional analysis
+$$
+K_I = \bar{\sigma} \sqrt{W} \outcol{\hat{K}_I}(\parcol{A}),
+\quad
+\bar{\sigma} = \frac{P}{W B},
+\quad
+A = \frac{a}{W}.
+$$
+2. Data gathering [(not if analytical method)]{.muted}
+   - Observations : $(\parcol{A}, \outcol{\hat{K}_I})$
+   - Experimental/Numerical methods
+3. Fit polynomial solution to data
+$$
+\small
+\outcol{\hat{K}_I}(\parcol{A})
+=
+\frac{(2+A)(0.76 + 4.8A - 11.58A^4 + 11.43 A^3 - 4.08 A^4)}{(1-A)^{3/2}}
+$$
 
 #### Limitations
 
@@ -171,42 +185,35 @@ Dense polynomials, limited to few parameters, etc.
 :::
 ::::
 
-:::{.notes}
-- Here is an example
-- First, dimension analysis are done
-- Then, the problem consists in determining one dimensionless function of dimensionless parameters.
-- Classic methods to determine the dimensionless function are ...
-- Limitations
-:::
 
 # Sparse regression {visibility="hidden"}
 
 ## Finding a sparse analytical model
 
-Colors: $\color{green}{\text{Inputs (parameters)} \pp},  \color{blue}{\text{Coefficients } \cc},  \color{red}{\text{Outputs } \Kp{p}}$.
+Colors: $\parcol{\text{Inputs (parameters)} \pp},  \color{blue}{\text{Coefficients } \cc},  \outcol{\text{Outputs } \Kp{m}}$.
 
 #### Objective
-For a structure and load parameterized by $\pp = [\pc{1}, \pc{2}, ..., \pc{N}]^{T}$, find the relationship $\Kp{p}(\pp)$.
+For a structure and load parameterized by $\pp = [\pc{1}, \pc{2}, ..., \pc{N}]^{T}$, find the relationship $\Kp{m}(\pp)$.
 
 
 #### Tool : LASSO regression [@tibshirani_regression_1996]
-We look for a polynomial approximation of 
+We look for a polynomial approximation of degree $d$ [(hyperparameter)]{.muted}
 $$
-\Kp{p}(\pp) \approx \tildeKp{p}{\cc}(\pp) = \sum_{i_1} \sum_{i_2} \cdot\cdot\cdot \sum_{i_N} \ccc{i_1, i_2, ..., i_n} \pc{1}^{i_1} \pc{2}^{i_2} ...  \pc{N}^{i_P}.
+\Kp{m}(\pp) \approx \tildeKp{m}{\cc}(\pp) = \sum_{i_1} \sum_{i_2} \cdot\cdot\cdot \sum_{i_N} \ccc{i_1, i_2, ..., i_n} \pc{1}^{i_1} \pc{2}^{i_2} ...  \pc{N}^{i_P}.
 $$
-For $\Nobs$ observations ($\pp$, $\Kp{p}$), the optimal coefficients $\ccopt$ minimizes
+For $\Nobs$ observations ($\pp$, $\Kp{m}$), the optimal coefficients $\ccopt$ minimizes
 $$
 \ccopt
 =
 \arg\min_{\cc}
-\frac{1}{2 \Nobs} \sum_{\boldsymbol{p}} \left(\tildeKp{p}{\cc}(\pp) - \Kp{p}(\pp) \right)^2
+\frac{1}{2 \Nobs} \sum_{\boldsymbol{p}} \left(\tildeKp{m}{\cc}(\pp) - \Kp{m}(\pp) \right)^2
 +
 \beta
 \color{blue}{\| \cc \|_1}
 , \quad
-\color{gray}{\| \boldsymbol{c} \|_1 = \sum_n | c_n |.}
+\color{gray}{\| \boldsymbol{c} \|_1 = \sum_n | c_n |,}
 $$
-The L1-norm of the coefficients $\cc$ drives irrelevant coefficients to zero.
+where $\beta$ is a hyperparameter. The L1-norm of the coefficients $\cc$ drives irrelevant coefficients to zero.
 
 #### Adding non-polynomial terms to model
 
@@ -230,9 +237,9 @@ Replace $\pp$ with $\mathbf{s} = [\pc{1}, f(\pc{1}), \pc{2}, f(\pc{2}), ..., \pc
 
 |               |                                                             |
 |---------------|-------------------------------------------------------------|
-| Observations  | $a$, $K_I$ [(from numerical simulation)]{.muted}            |
-| Parameters    | $a$, $\exp(a)$, $\frac{1}{\sqrt{b-a}}$                      |
-| Output        | $\hat{K}_I = \frac{K_I}{\sigma \sqrt{a}}$ with $\sigma=P/b$ |
+| Observations  | $\parcol{a}$, $\outcol{K_I}$ [(from numerical simulation)]{.muted}            |
+| Parameters    | $\parcol{a}$, $\exp(\parcol{a})$, $\frac{1}{\sqrt{b-\parcol{a}}}$                      |
+| Output        | $\outcol{\hat{K}_I} = \frac{K_I}{\sigma \sqrt{a}}$ with $\sigma=P/b$ |
 
 :::
 :::{.column}
@@ -248,7 +255,7 @@ Replace $\pp$ with $\mathbf{s} = [\pc{1}, f(\pc{1}), \pc{2}, f(\pc{2}), ..., \pc
 
 
 
-## Ex. 1 : CT specimen - Tradeoff - [Deg=2]{.example}
+## Ex. 1 : CT specimen - Tradeoff - [$d=2$]{.example}
 ::::{.columns}
 :::{.column width=65%}
 :::{.r-stack}
@@ -297,7 +304,7 @@ LaTeX expression:
 :::
 ::::
 
-## Ex. 1 : CT specimen - Tradeoff - [Deg=3]{.example}
+## Ex. 1 : CT specimen - Tradeoff - [$d=3$]{.example}
 ::::{.columns}
 :::{.column width=65%}
 :::{.r-stack}
@@ -397,7 +404,7 @@ By G. Eliyahu-Yakir and P. Reis (EPFL)
 
 :::{.column width=58% .fragment}
 #### Dimensional analysis [(towards a 3-parameter problem)]{.muted}
-The superposition principle ($K_p = K_{p}^{\Omega} + K_{p}^{\dot{\Omega}}$) and the Buckingham $\Pi$ theorem give [($\frac{L}{W}$ is fixed)]{.muted}
+The superposition principle ($K_m = K_{m}^{\Omega} + K_{m}^{\dot{\Omega}}$) and the Buckingham $\Pi$ theorem give [($\frac{L}{W}$ is fixed)]{.muted}
 
 - centrifugal load
   - $K_{I}^{\Omega}   = \rho \color{green}{\Omega}^2 \color{green}{W}^{5/2} \color{red}{\hat{K}_{I}^{\Omega}}\left(\color{green}{\frac{a}{W}}, \color{green}{\frac{L_c}{L}}, \color{gray}{\frac{L}{W}}\right)$
