@@ -53,6 +53,10 @@ An elastic body $\Omega$ with a crack $\Gamma$ under a given load.
 **[Question :]{.example .smallcaps} Does the crack propagates ?**
 :::
 
+:::{.notes}
+- Fracture mechanics : finding when a structure with defect/crack will break ?
+- Elastic body with crack
+:::
 
 
 ## Crack tip singularity
@@ -81,7 +85,7 @@ There is a stress singularity at crack tip.
 ::::
 
 
-::::{.columns .fragment}
+::::{.columns}
 
 :::{.column width=40%}
 <br>
@@ -100,6 +104,12 @@ Denoted $K_p$, they :
 ![Source: [https://en.wikipedia.org/wiki/Fracture_mechanics](https://en.wikipedia.org/wiki/Fracture_mechanics).](figures/fracture_modes.svg)
 :::
 ::::
+
+:::{.notes}
+- Stress field is singular at crack tip
+- Stress Intensity Factor quantify the amplitude of the sollicitation
+- Depends on the geometry and load (and $\nu$)
+:::
 
 ## Designing structures with cracks
 
@@ -131,6 +141,12 @@ Known solutions have been compiled in handbooks!
 :::
 ::::
 
+:::{.notes}
+- SIFs are employed in crack propagation criteria
+- Mean of determination
+- Solution for standart and common configurations are compiled in handbooks
+:::
+
 ## Example [@tada_stress_2000]
 
 ::::{.columns}
@@ -139,26 +155,29 @@ Known solutions have been compiled in handbooks!
 :::
 :::{.column}
 
+
 ![](figures/tada_et_al_2000_round_ct_specimen_expression.png){fig-align="center" width=100%}
 
+#### Methodology
 
-Dimensional analysis $\rightarrow$ Relevant parameters.
-
-Here, it introduces the
-
-:::{style="text-align:center;"}
-**configuration function** $F(\pp)$,
-:::
-
-depending on the parameters $\pp$ (geometry & load).
+1. Dimensional analysis to find relevant parameters
+	- **dimensionless function** $F(\pp)$,<br>depending on parameters $\pp$ (geometry & load).
+2. Find $F(\pp)$ as truncated series expansion, or <br> fit of numerical/experimental data, or ...
 
 #### Limitations
 
-- Dense polynomials
-- Few parameters
+Dense polynomials, limited to few parameters, etc.
 
 :::
 ::::
+
+:::{.notes}
+- Here is an example
+- First, dimension analysis are done
+- Then, the problem consists in determining one dimensionless function of dimensionless parameters.
+- Classic methods to determine the dimensionless function are ...
+- Limitations
+:::
 
 # Sparse regression {visibility="hidden"}
 
@@ -180,7 +199,7 @@ $$
 \ccopt
 =
 \arg\min_{\cc}
-\frac{1}{2 \Nobs} \sum_{\boldsymbol{p}}  \left(\tildeKp{p}{\cc}(\pp) - \Kp{p}(\pp) \right)^2
+\frac{1}{2 \Nobs} \sum_{\boldsymbol{p}} \left(\tildeKp{p}{\cc}(\pp) - \Kp{p}(\pp) \right)^2
 +
 \beta
 \color{blue}{\| \cc \|_1}
@@ -192,6 +211,11 @@ The L1-norm of the coefficients $\cc$ drives irrelevant coefficients to zero.
 #### Adding non-polynomial terms to model
 
 Replace $\pp$ with $\mathbf{s} = [\pc{1}, f(\pc{1}), \pc{2}, f(\pc{2}), ..., \pc{N}, f(\pc{N})]$.
+
+:::{.notes}
+- Our goal is to lift those limitations.
+- etc.
+:::
 
 # Applications {visibility="hidden"}
 
