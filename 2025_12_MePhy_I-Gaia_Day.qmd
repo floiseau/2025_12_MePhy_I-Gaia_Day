@@ -217,7 +217,7 @@ where $\beta$ is a hyperparameter. The L1-norm of the coefficients $\cc$ drives 
 
 #### Adding non-polynomial terms to model
 
-Replace $\pp$ with $\mathbf{s} = [\pc{1}, f(\pc{1}), \pc{2}, f(\pc{2}), ..., \pc{N}, f(\pc{N})]$.
+Replace $\pp$ with $\mathbf{s} = [\pc{1}, \pc{2}, ..., \pc{N}, f(\pc{i})]$.
 
 :::{.notes}
 - Our goal is to lift those limitations.
@@ -228,29 +228,48 @@ Replace $\pp$ with $\mathbf{s} = [\pc{1}, f(\pc{1}), \pc{2}, f(\pc{2}), ..., \pc
 
 ## Ex. 1 : CT specimen - Setup & Data
 ::::{.columns}
-:::{.column}
-#### Compact Tension (CT) specimen
 
-![](figures/ct_specimen.svg){width=50% fig-align="center"}
-
-#### Sparse regression setup
-
-|               |                                                             |
-|---------------|-------------------------------------------------------------|
-| Observations  | $\parcol{a}$, $\outcol{K_I}$ [(from numerical simulation)]{.muted}            |
-| Parameters    | $\parcol{a}$, $\exp(\parcol{a})$, $\frac{1}{\sqrt{b-\parcol{a}}}$                      |
-| Output        | $\outcol{\hat{K}_I} = \frac{K_I}{\sigma \sqrt{a}}$ with $\sigma=P/b$ |
-
-:::
-:::{.column}
+:::{.column width=50%}
 
 <br>
 
-#### Observations
+#### Parameters and Observations
+
+
+:::{.r-stack}
 
 ![](figures/ct_specimen_observations.svg){width=100%}
 
+![](figures/ct_specimen.svg){.absolute top=250 left=150 width=20%}
+
 :::
+
+:::
+
+:::{.column width=50%}
+
+#### 1. Dimensional analysis
+
+$$
+K_I = \sigma \sqrt{a} \outcol{\hat{K}_I}\left(\parcol{\frac{a}{b}}\right)
+, \quad
+\sigma = \frac{P}{b}.
+$$
+
+#### 2. Data gathering 
+
+- Observations [(elastic simulations)]{.muted} : $\left(\parcol{\frac{a}{b}}, \outcol{\hat{K}_I}\right)$
+
+#### 3. Sparse regression
+
+$$\pp = \left[ \parcol{\frac{a}{b}}, \exp\left(\parcol{a/b}\right), \frac{1}{\sqrt{1-\parcol{a/b}}} \right]$$
+
+- Hyperparameters :
+	- Vary $\beta$ $\to$ find good accuracy-simplicity tradeoff
+	- $d=2$, increase until satisfied.
+
+:::
+
 ::::
 
 
@@ -276,7 +295,7 @@ Assessment :
 	- Number of coefficients : 1
 	- R2 score               : 0.000
 LaTeX expression:
-\hat{K}_{I}(a) =
+\hat{K}_{I}(a/b) =
 	+45.6
 
 === Model 2
@@ -285,9 +304,9 @@ Assessment :
 	- Number of coefficients : 2
 	- R2 score               : 0.967
 LaTeX expression:
-\hat{K}_{I}(a) =
+\hat{K}_{I}(a/b) =
 	-21.1
-	+17.9 \frac{1}{\sqrt{b-a}}^2
+	+17.9 \frac{1}{\sqrt{1-a/b}}^2
 
 === Model 3
 Assessment :
@@ -295,10 +314,10 @@ Assessment :
 	- Number of coefficients : 3
 	- R2 score               : 0.997
 LaTeX expression:
-\hat{K}_{I}(a) =
+\hat{K}_{I}(a/b) =
 	+5.43
 	-14.4 \exp(a/b)^2
-	+22.9 \frac{1}{\sqrt{b-a}}^2
+	+22.9 \frac{1}{\sqrt{1-a/b}}^2
 ```
 
 :::
@@ -325,7 +344,7 @@ Assessment :
 	- Number of coefficients : 1
 	- R2 score               : 0.000
 LaTeX expression:
-\hat{K}_{I}(a) =
+\hat{K}_{I}(a/b) =
 	+45.6
 
 === Model 2
@@ -334,9 +353,9 @@ Assessment :
 	- Number of coefficients : 2
 	- R2 score               : 0.999
 LaTeX expression:
-\hat{K}_{I}(a) =
+\hat{K}_{I}(a/b) =
 	+3.75
-	+4.11 \frac{1}{\sqrt{b-a}}^3
+	+4.11 \frac{1}{\sqrt{1-a/b}}^3
 
 === Model 3
 Assessment :
@@ -344,10 +363,10 @@ Assessment :
 	- Number of coefficients : 3
 	- R2 score               : 1.000
 LaTeX expression:
-\hat{K}_{I}(a) =
+\hat{K}_{I}(a/b) =
 	+5.32
 	-0.383 \exp(a/b)^3
-	+4.19 \frac{1}{\sqrt{b-a}}^3
+	+4.19 \frac{1}{\sqrt{1-a/b}}^3
 ```
 
 :::

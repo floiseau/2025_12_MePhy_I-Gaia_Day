@@ -21,11 +21,11 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="pt"
-     inkscape:zoom="0.25401444"
-     inkscape:cx="-909.39714"
-     inkscape:cy="657.44295"
-     inkscape:window-width="2556"
-     inkscape:window-height="1381"
+     inkscape:zoom="0.32903097"
+     inkscape:cx="572.8944"
+     inkscape:cy="767.40496"
+     inkscape:window-width="1916"
+     inkscape:window-height="1021"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="0"
@@ -124,6 +124,15 @@ CreationDate: Wed Dec  3 15:56:37 2025
   <g
      id="g2990"
      transform="translate(-522.301,-185.429)">
+    <rect
+       style="fill:#ffffff;stroke-width:8.50395"
+       id="rect1"
+       width="982.39893"
+       height="945.14099"
+       x="527.30103"
+       y="188.429"
+       transform="translate(2.4999999e-6)"
+       inkscape:label="background" />
     <circle
        fill="#b2b2b2"
        cx="525.30103"
